@@ -22,7 +22,8 @@ def setting(name: str) -> str:
     return os.getenv(name, '')
 
 api_key = setting('OPENAI_API_KEY')
-vector_store_id = setting('VECTOR_STORE_ID')
+vector_store_id = os.getenv("VECTOR_STORE_ID")
+
 if not api_key or not vector_store_id:
     st.error('OPENAI_API_KEY 및 VECTOR_STORE_ID를 .streamlit/secrets.toml 또는 환경변수에 설정하세요.')
     st.stop()
