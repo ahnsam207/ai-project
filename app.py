@@ -21,7 +21,7 @@ def setting(name: str) -> str:
         pass
     return os.getenv(name, '')
 
-api_key = setting('OPENAI_API_KEY')
+api_key = st.secrets["OPENAI_API_KEY"]
 vector_store_id = os.getenv("VECTOR_STORE_ID")
 
 if not api_key or not vector_store_id:
