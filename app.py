@@ -90,14 +90,14 @@ def get_event_loop():
 
 async def ask_agent(question: str, use_mcp: bool, user_id: str) -> str:
 
-    rag = FileSearchTool(
-        tools = []
-        if vector_store_id:
-            tools.append(FileSearchTool(
-                vector_store_ids=[vector_store_id],
-                max_num_results=3
-            ))
-    )
+    
+    tools = []
+    if vector_store_id:
+        tools.append(FileSearchTool(
+            vector_store_ids=[vector_store_id],
+            max_num_results=3
+        ))
+    
 
     # 같은 user_id와 DB 파일을 사용하므로 대화 이력 유지
     session = SQLiteSession(
