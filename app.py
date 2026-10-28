@@ -21,13 +21,16 @@ def setting(name: str) -> str:
         pass
     return os.getenv(name, '')
 
-api_key = setting("OPENAI_API_KEY")
-vector_store_id = setting("VECTOR_STORE_ID")
+api_key = setting('OPENAI_API_KEY')
+vector_store_id = setting('VECTOR_STORE_ID')
 
-if not api_key or not vector_store_id:
-    st.error('OPENAI_API_KEY 및 VECTOR_STORE_ID를 .streamlit/secrets.toml 또는 환경변수에 설정하세요.')
+if not api_key:
+    st.error('OPENAI_API_KEY를 Streamlit Secrets에 설정하세요.')
     st.stop()
 set_default_openai_key(api_key)
+
+if not vector_store_id:
+    st.warning('VECTOR_STORE_ID가 없어 PDF 자료 검색 없이 동작합니다.')
 
 INSTRUCTIONS = '''
 너는 중학생의 과학탐구 질문 형성을 지원하는 Science Inquiry Coach이다.
@@ -88,8 +91,12 @@ def get_event_loop():
 async def ask_agent(question: str, use_mcp: bool, user_id: str) -> str:
 
     rag = FileSearchTool(
-        vector_store_ids=[vector_store_id],
-        max_num_results=3
+        tools = []
+        if vector_store_id:
+            tools.append(FileSearchTool(
+                vector_store_ids=[vector_store_id],
+                max_num_results=3
+            ))
     )
 
     # 같은 user_id와 DB 파일을 사용하므로 대화 이력 유지
@@ -111,7 +118,7 @@ async def ask_agent(question: str, use_mcp: bool, user_id: str) -> str:
             agent = Agent(
                 name="Connected Science Inquiry Coach",
                 instructions=INSTRUCTIONS,
-                tools=[rag],
+                tools=tools,
                 mcp_servers=[server]
             )
 
@@ -128,7 +135,7 @@ async def ask_agent(question: str, use_mcp: bool, user_id: str) -> str:
         agent = Agent(
             name="RAG Science Inquiry Coach",
             instructions=INSTRUCTIONS,
-            tools=[rag]
+            tools=tools
         )
 
         result = await Runner.run(
